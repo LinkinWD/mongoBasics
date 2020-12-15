@@ -58,7 +58,24 @@ const productSchema = new mongoose.Schema({
         enum: ['s', 'm', 'l']
     }
 })
+const sellerSchema = new mongoose.Schema({
+    firstName: String,
+    lastName: String
+})
+sellerSchema.virtual('fullName').get(function() {
+    return `${this.firstName} ${this.lastName}`
+})
 
+//pitää olla next tai async, middleware
+sellerSchema.pre('save', async function() {
+    console.log('olet tallentamassa')
+})
+sellerSchema.post('save', async function() {
+    console.log('olet tallentanut')
+})
+
+//eka yksikössä on tietokanna nimi ja toinen on sen pohjapiirrustus
+const Seller = mongoose.model('Seller', sellerSchema)
 //Muista käyttää vanhaa functota
 /* productSchema.methods.greet = function() {
     console.log('hei vaan')
@@ -75,6 +92,10 @@ productSchema.methods.addCategory = function(newCat) {
     this.categories.push(newCat)
     return this.save
 }
+productSchema.statics.fireSale = function() {
+    //update all
+    return this.updateMany({}, {onSale: true, price: 0} )
+}
 
 const Product = mongoose.model('Product', productSchema)
 
@@ -88,9 +109,10 @@ const Product = mongoose.model('Product', productSchema)
 
  }
 
+//koska static method, niin yhdistyy luokkaan Product.
+Product.fireSale().then(res => console.log(res))
 
-
- findProduct();
+ /* findProduct(); */
 /* const bike = new Product({ name: 'gloves', price: 9, categories: ['cycling']})
 bike.save()
 .then(data => {
